@@ -152,10 +152,43 @@ footer {
 footer a { color: var(--red); text-decoration: none; }
 footer a:hover { text-decoration: underline; }
 
-@media(max-width:600px) {
-  .hero h1 { font-size: 1.9rem; }
-  .strip { gap: 18px; padding: 14px 18px; }
-  main { padding: 28px 16px 48px; }
+/* ───── MOBILE ───── */
+@media(max-width:640px) {
+  /* Hero */
+  .hero { padding: 36px 20px 32px; }
+  .hero-bull { width: 58px; height: 58px; font-size: 26px; margin-bottom: 16px; }
+  .hero h1 { font-size: 1.8rem; }
+  .hero p { font-size: .94rem; }
+  .hero-btns { flex-direction: column; align-items: stretch; gap: 10px; margin-top: 22px; }
+  .btn-primary, .btn-ghost { text-align: center; padding: 13px 20px; }
+
+  /* Feature strip: 2-column grid */
+  .strip {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 16px;
+    padding: 16px 18px;
+    justify-items: start;
+  }
+  .feat { font-size: .78rem; }
+
+  /* Main */
+  main { padding: 24px 14px 44px; }
+  .section-label { font-size: .82rem; }
+
+  /* Nav cards: single column */
+  .grid { grid-template-columns: 1fr; gap: 14px; }
+  .card { padding: 20px 18px; }
+  .card-title { font-size: 1rem; }
+
+  /* How it works */
+  .how { padding: 20px 18px 18px; }
+  .step-text { font-size: .85rem; }
+}
+
+@media(max-width:380px) {
+  .strip { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 1.55rem; }
 }
 </style>
 </head>
