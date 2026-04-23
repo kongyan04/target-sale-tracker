@@ -180,14 +180,244 @@ footer a:hover { text-decoration: underline; }
         create a completely standalone project. This resulted in a new <code>target_sale/</code> sub-folder
         containing three fresh files: <code>index.html</code> (landing page with navigation),
         <code>tracker.html</code> (the sale tracker), and <code>prompts.html</code> (this page).
-        The already-drafted <code>target_tracker.html</code> in the root was abandoned in favour of
-        the cleaner sub-folder structure.
       </div>
       <div class="pchips">
         <span class="chip"><a href="index.html">index.html</a> (new)</span>
         <span class="chip"><a href="tracker.html">tracker.html</a> (new)</span>
         <span class="chip"><a href="prompts.html">prompts.html</a> (new)</span>
         <span class="chip">target_sale/ sub-folder</span>
+      </div>
+    </div>
+
+    <!-- ── PROMPT 4 ── -->
+    <div class="pcard">
+      <div class="pmeta">
+        <div class="pnum">4</div>
+        <span class="ptag tag-greeting">Reaction</span>
+        <span class="pdate">Apr 23, 2026</span>
+      </div>
+      <div class="pquote">"can you bring the website up for me?"</div>
+      <div class="pdesc">
+        Asked Claude to open the finished website in the browser. Claude ran <code>open index.html</code>
+        via the macOS shell, launching the landing page directly in the default browser without any
+        manual navigation needed.
+      </div>
+      <div class="pchips">
+        <span class="chip">No file output</span>
+        <span class="chip">Browser launch</span>
+      </div>
+    </div>
+
+    <!-- ── PROMPT 5 ── -->
+    <div class="pcard">
+      <div class="pmeta">
+        <div class="pnum">5</div>
+        <span class="ptag tag-greeting">Feedback</span>
+        <span class="pdate">Apr 23, 2026</span>
+      </div>
+      <div class="pquote">"that looks amazing! Thanks!"</div>
+      <div class="pdesc">
+        Positive feedback confirming the design and layout met expectations. Claude saved a memory
+        note about the project structure for future sessions.
+      </div>
+      <div class="pchips">
+        <span class="chip">No file output</span>
+        <span class="chip">Memory saved</span>
+      </div>
+    </div>
+
+    <!-- ── PROMPT 6 ── -->
+    <div class="pcard">
+      <div class="pmeta">
+        <div class="pnum">6</div>
+        <span class="ptag tag-data">Live data</span>
+        <span class="pdate">Apr 23, 2026</span>
+      </div>
+      <div class="pquote">"can we go live with this to connect to the real target item with the link"</div>
+      <div class="pdesc">
+        Requested real Target sale data instead of demo items. Claude built <code>target_proxy.js</code>
+        — a Node.js/Express backend that fetches live sale data from Target's internal
+        <code>redsky.target.com</code> API. After iterative debugging (fixing store ID params, removing
+        the <code>scheduled_delivery_store_id</code> field, adding zip/state/country, and pre-fetching
+        a real visitor ID cookie), the proxy successfully returned 85+ live sale items with direct
+        product URLs. <code>package.json</code> was also created and dependencies installed.
+      </div>
+      <div class="pchips">
+        <span class="chip">target_proxy.js</span>
+        <span class="chip">package.json</span>
+        <span class="chip">85+ live deals</span>
+        <span class="chip">Target redsky API</span>
+        <span class="chip">LIVE = true</span>
+      </div>
+    </div>
+
+    <!-- ── PROMPT 7 ── -->
+    <div class="pcard">
+      <div class="pmeta">
+        <div class="pnum">7</div>
+        <span class="ptag tag-greeting">Navigation</span>
+        <span class="pdate">Apr 23, 2026</span>
+      </div>
+      <div class="pquote">"can you bring the website"</div>
+      <div class="pdesc">
+        A second browser-launch request after the live data was connected. Claude opened
+        <code>index.html</code> again so the live tracker could be seen with real Target products.
+      </div>
+      <div class="pchips">
+        <span class="chip">No file output</span>
+        <span class="chip">Browser launch</span>
+      </div>
+    </div>
+
+    <!-- ── PROMPT 8 ── -->
+    <div class="pcard">
+      <div class="pmeta">
+        <div class="pnum">8</div>
+        <span class="ptag tag-greeting">Feedback</span>
+        <span class="pdate">Apr 23, 2026</span>
+      </div>
+      <div class="pquote">"good job!"</div>
+      <div class="pdesc">
+        Positive confirmation after seeing the live data working. Claude updated the project memory
+        notes with the correct API parameters that made the Target API work.
+      </div>
+      <div class="pchips">
+        <span class="chip">No file output</span>
+        <span class="chip">Memory updated</span>
+      </div>
+    </div>
+
+    <!-- ── PROMPT 9 ── -->
+    <div class="pcard">
+      <div class="pmeta">
+        <div class="pnum">9</div>
+        <span class="ptag tag-feature">Feature request</span>
+        <span class="pdate">Apr 23, 2026</span>
+      </div>
+      <div class="pquote">"can you get the picture of the product as well?"</div>
+      <div class="pdesc">
+        Asked for real product images on each deal card. Claude debugged the Target API response
+        structure and found that product photos live at <code>item.enrichment.image_info.primary_image.url</code>
+        (not the initially assumed path). The proxy was updated to extract and return image URLs from
+        Target's Scene7 CDN with a <code>?wid=300&hei=300</code> resize parameter. The tracker card
+        was updated to render an <code>&lt;img&gt;</code> tag with an emoji fallback if the image fails.
+      </div>
+      <div class="pchips">
+        <span class="chip">target_proxy.js updated</span>
+        <span class="chip">tracker.html updated</span>
+        <span class="chip">Scene7 CDN images</span>
+        <span class="chip">Emoji fallback</span>
+      </div>
+    </div>
+
+    <!-- ── PROMPT 10 ── -->
+    <div class="pcard">
+      <div class="pmeta">
+        <div class="pnum">10</div>
+        <span class="ptag tag-feature">Deployment</span>
+        <span class="pdate">Apr 23, 2026</span>
+      </div>
+      <div class="pquote">"can you publish it as a public accessible website so my students can see? I already have github account, and you can put it there."</div>
+      <div class="pdesc">
+        Requested a public deployment for classroom use. Claude used the GitHub CLI (<code>gh</code>)
+        to create a new public repository (<code>kongyan04/target-sale-tracker</code>), pushed all files,
+        and enabled GitHub Pages — making the site available at
+        <code>kongyan04.github.io/target-sale-tracker</code> with demo data (since GitHub Pages
+        cannot run Node.js).
+      </div>
+      <div class="pchips">
+        <span class="chip">GitHub repo created</span>
+        <span class="chip">GitHub Pages enabled</span>
+        <span class="chip">.gitignore added</span>
+        <span class="chip">render.yaml added</span>
+      </div>
+    </div>
+
+    <!-- ── PROMPT 11 ── -->
+    <div class="pcard">
+      <div class="pmeta">
+        <div class="pnum">11</div>
+        <span class="ptag tag-feature">Deployment</span>
+        <span class="pdate">Apr 23, 2026</span>
+      </div>
+      <div class="pquote">"can you make it to be able to run Node.js?"</div>
+      <div class="pdesc">
+        Requested a platform that can actually run the Node.js proxy for live data. Claude installed
+        the Vercel CLI, updated the Express app to export itself for serverless use
+        (<code>module.exports = app</code>), added <code>vercel.json</code> config, and deployed
+        to Vercel. The site now runs Node.js server-side at <code>targetsale.vercel.app</code>
+        with full live Target data.
+      </div>
+      <div class="pchips">
+        <span class="chip">vercel.json added</span>
+        <span class="chip">Vercel CLI deployed</span>
+        <span class="chip">targetsale.vercel.app</span>
+        <span class="chip">Node.js live</span>
+      </div>
+    </div>
+
+    <!-- ── PROMPT 12 ── -->
+    <div class="pcard">
+      <div class="pmeta">
+        <div class="pnum">12</div>
+        <span class="ptag tag-greeting">Deployment</span>
+        <span class="pdate">Apr 23, 2026</span>
+      </div>
+      <div class="pquote">"can you do it for me?"</div>
+      <div class="pdesc">
+        Asked Claude to handle the full Vercel deployment autonomously. Claude installed the Vercel CLI
+        via npm, triggered a device-authentication flow (the user approved it in the browser), then
+        deployed the project to production in one command. The live URL
+        <code>targetsale.vercel.app</code> was created automatically.
+      </div>
+      <div class="pchips">
+        <span class="chip">Vercel CLI installed</span>
+        <span class="chip">OAuth device login</span>
+        <span class="chip">Auto-deployed</span>
+      </div>
+    </div>
+
+    <!-- ── PROMPT 13 ── -->
+    <div class="pcard">
+      <div class="pmeta">
+        <div class="pnum">13</div>
+        <span class="ptag tag-bug">Bug fix</span>
+        <span class="pdate">Apr 23, 2026</span>
+      </div>
+      <div class="pquote">"this link says: Cannot GET /"</div>
+      <div class="pdesc">
+        The deployed site returned a 404 because the <code>vercel.json</code> routed every request —
+        including the homepage — through the Express function, but <code>express.static</code> doesn't
+        work inside Vercel's serverless runtime. Claude fixed this by splitting the routing: HTML files
+        are now served directly by Vercel's static layer (<code>@vercel/static</code>), while only
+        <code>/api/*</code> routes go to the Node.js function. Redeployed and verified HTTP 200.
+      </div>
+      <div class="pchips">
+        <span class="chip">vercel.json fixed</span>
+        <span class="chip">@vercel/static added</span>
+        <span class="chip">target_proxy.js updated</span>
+        <span class="chip">HTTP 200 confirmed</span>
+      </div>
+    </div>
+
+    <!-- ── PROMPT 14 ── -->
+    <div class="pcard">
+      <div class="pmeta">
+        <div class="pnum">14</div>
+        <span class="ptag tag-bug">Content fix</span>
+        <span class="pdate">Apr 23, 2026</span>
+      </div>
+      <div class="pquote">"you forgot the include all prompts in the prompt tracking page"</div>
+      <div class="pdesc">
+        Noticed the Prompt Log only had 3 entries instead of all 14 from the session. Claude reviewed
+        the full conversation history and added prompts 4 through 14, each with an accurate description,
+        category tag, output chips, and date. The updated file was committed and pushed to GitHub,
+        then redeployed to Vercel.
+      </div>
+      <div class="pchips">
+        <span class="chip">prompts.html updated</span>
+        <span class="chip">14 prompts logged</span>
+        <span class="chip">Redeployed</span>
       </div>
     </div>
 
