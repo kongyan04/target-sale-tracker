@@ -339,8 +339,10 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color:
  │  { deals: [ { id, cat, icon, title, orig, sale,          │
  │               rating, reviews, isNew, url } ] }          │
  └──────────────────────────────────────────────────────────*/
-const LIVE      = false;  // set true + run target_proxy.js for live data
-const PROXY     = 'http://localhost:3001/api/deals';
+// When served by the Node.js server (local or Render), use a relative path.
+// When opened as a plain file (file://), fall back to demo data automatically.
+const LIVE  = window.location.protocol !== 'file:';
+const PROXY = '/api/deals';
 const TICK_MS   = 30 * 60 * 1000; // 30-minute auto-refresh
 
 // ─── DEMO CATALOGUE ─────────────────────────────────────────

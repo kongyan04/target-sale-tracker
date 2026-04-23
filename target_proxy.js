@@ -11,10 +11,14 @@
 const express = require('express');
 const axios   = require('axios');
 const cors    = require('cors');
+const path    = require('path');
 
 const app  = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
+
 app.use(cors());
+// Serve the static HTML/CSS/JS files in this folder
+app.use(express.static(path.join(__dirname)));
 
 // ── Cache ────────────────────────────────────────────────────
 let CACHE    = null;
