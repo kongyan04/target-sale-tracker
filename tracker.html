@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Target Sale Tracker</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --red:      #CC0000;
+  --red-dk:   #990000;
+  --red-lt:   #fff0f0;
+  --red-mid:  #ffd5d5;
+  --text:     #1a1a1a;
+  --muted:    #666;
+  --border:   #e2e2e2;
+  --bg:       #f7f7f7;
+  --card:     #ffffff;
+  --green:    #1a7a3c;
+  --green-bg: #e6f4ed;
+  --gold:     #f59e0b;
+}
+
+body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* ───── TOPBAR ───── */
+.topbar {
+  background: var(--red);
+  padding: 16px 28px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0; }
+.bull {
+  width: 42px; height: 42px;
+  background: #fff;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 900; color: var(--red);
+  box-shadow: 0 0 0 4px rgba(255,255,255,0.25);
+  user-select: none;
+}
+.brand-name { color: #fff; font-size: 1.35rem; font-weight: 800; line-height: 1.1; }
+.brand-sub  { color: rgba(255,255,255,0.7); font-size: 0.72rem; }
+
+.searchbox {
+  flex: 1; min-width: 200px; position: relative;
+}
+.searchbox svg {
+  position: absolute; left: 12px; top: 50%;
+  transform: translateY(-50%); pointer-events: none;
+}
+.searchbox input {
+  width: 100%; padding: 9px 14px 9px 38px;
+  border-radius: 999px; border: none; font-size: 0.92rem;
+  background: rgba(255,255,255,0.9); outline: none; color: var(--text);
+}
+
+.topbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+.pill {
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.32);
+  color: #fff; font-size: 0.76rem; font-weight: 600;
+  padding: 5px 12px; border-radius: 999px;
+  display: flex; align-items: center; gap: 6px;
+}
+.dot { width: 7px; height: 7px; border-radius: 50%; }
+.dot-live { background: #6ee7b7; animation: pulse 2s infinite; }
+.dot-demo { background: #fbbf24; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+.btn-sm {
+  background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.38);
+  color: #fff; padding: 7px 14px; border-radius: 999px;
+  font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: background .2s;
+}
+.btn-sm:hover { background: rgba(255,255,255,0.3); }
+.btn-sm:disabled { opacity: .55; cursor: not-allowed; }
+
+/* ───── CAT TABS ───── */
+.cattabs {
+  background: var(--red-dk); padding: 0 28px;
+  display: flex; overflow-x: auto; scrollbar-width: none;
+}
+.cattabs::-webkit-scrollbar { display: none; }
+.tab {
+  padding: 12px 18px; color: rgba(255,255,255,.7);
+  font-size: 0.83rem; font-weight: 600; white-space: nowrap;
+  cursor: pointer; border-bottom: 3px solid transparent;
+  transition: color .15s, border-color .15s; user-select: none;
+}
+.tab:hover { color: #fff; }
+.tab.active { color: #fff; border-bottom-color: #fff; }
+
+/* ───── BANNERS ───── */
+.banner {
+  padding: 10px 28px; font-size: 0.83rem;
+  display: flex; align-items: center; gap: 8px;
+}
+.banner-demo { background: #fffbeb; border-bottom: 2px solid #fde68a; color: #92400e; }
+.banner-watch {
+  background: var(--green-bg); border-bottom: 2px solid #a7f3d0;
+  color: var(--green); display: none;
+}
+.banner-watch.on { display: flex; }
+.wcount {
+  background: var(--green); color: #fff;
+  border-radius: 999px; padding: 1px 8px; font-size: .74rem; font-weight: 700;
+}
+
+/* ───── CONTROLS ───── */
+.controls {
+  background: #fff; border-bottom: 1px solid var(--border);
+  padding: 10px 28px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+.res-count { font-size: .86rem; color: var(--muted); flex: 1; }
+.res-count b { color: var(--red); }
+.controls select {
+  padding: 6px 11px; border: 1px solid var(--border); border-radius: 6px;
+  font-size: .83rem; background: #fff; cursor: pointer; outline: none;
+}
+.controls select:focus { border-color: var(--red); }
+.btn-toggle {
+  padding: 6px 13px; border: 1.5px solid var(--border); background: #fff;
+  border-radius: 6px; font-size: .8rem; font-weight: 600;
+  cursor: pointer; color: var(--muted); transition: all .15s;
+}
+.btn-toggle.on { border-color: var(--red); color: var(--red); background: var(--red-lt); }
+
+/* ───── GRID ───── */
+.wrap { max-width: 1260px; margin: 0 auto; padding: 26px 28px 60px; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 18px;
+}
+
+/* ───── CARD ───── */
+.card {
+  background: var(--card); border: 1.5px solid var(--border);
+  border-radius: 14px; overflow: hidden;
+  display: flex; flex-direction: column; position: relative;
+  transition: transform .15s, box-shadow .15s, border-color .15s;
+}
+.card:hover { transform: translateY(-3px); box-shadow: 0 8px 22px rgba(0,0,0,.1); }
+.card.saved { border-color: var(--red); border-width: 2px; }
+
+.badge-off {
+  position: absolute; top: 10px; left: 10px; z-index: 2;
+  background: var(--red); color: #fff;
+  font-size: .73rem; font-weight: 800; padding: 3px 9px; border-radius: 6px;
+}
+.badge-new {
+  position: absolute; top: 10px; right: 10px; z-index: 2;
+  background: var(--green); color: #fff;
+  font-size: .66rem; font-weight: 700; padding: 3px 7px; border-radius: 5px;
+}
+
+.thumb {
+  height: 160px; background: #f2f2f2;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 52px; user-select: none; overflow: hidden;
+}
+.thumb img {
+  width: 100%; height: 100%; object-fit: contain;
+  padding: 10px; background: #fff;
+}
+.cbody { padding: 12px 14px 14px; flex: 1; display: flex; flex-direction: column; gap: 7px; }
+.ccat { font-size: .67rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--red); }
+.ctitle { font-size: .9rem; font-weight: 600; line-height: 1.4; flex: 1; }
+.crating { font-size: .76rem; color: var(--muted); }
+.stars { color: var(--gold); }
+.cprice { display: flex; align-items: baseline; gap: 8px; }
+.psale { font-size: 1.2rem; font-weight: 800; color: var(--red); }
+.porig { font-size: .86rem; color: var(--muted); text-decoration: line-through; }
+.psave { font-size: .72rem; color: var(--green); font-weight: 700; background: var(--green-bg); padding: 2px 6px; border-radius: 4px; }
+
+.cfoot { display: flex; gap: 7px; padding: 0 14px 13px; }
+.btn-buy {
+  flex: 1; background: var(--red); color: #fff;
+  border: none; padding: 8px 10px; border-radius: 8px;
+  font-size: .82rem; font-weight: 700; cursor: pointer;
+  text-decoration: none; text-align: center; transition: background .2s;
+}
+.btn-buy:hover { background: var(--red-dk); }
+.btn-save {
+  background: #fff; border: 1.5px solid var(--border); color: var(--muted);
+  padding: 8px 10px; border-radius: 8px; font-size: .82rem;
+  cursor: pointer; transition: all .15s;
+}
+.btn-save:hover { border-color: var(--red); color: var(--red); }
+.btn-save.on { border-color: var(--red); color: var(--red); background: var(--red-lt); }
+
+/* ───── EMPTY / LOADER ───── */
+.empty { grid-column: 1/-1; text-align: center; padding: 56px 20px; color: var(--muted); }
+.empty h3 { color: var(--text); font-size: 1.1rem; margin-bottom: 6px; }
+
+.overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(255,255,255,.68); z-index: 100;
+  align-items: center; justify-content: center; flex-direction: column; gap: 12px;
+}
+.overlay.on { display: flex; }
+.spin {
+  width: 38px; height: 38px; border: 4px solid var(--red-mid);
+  border-top-color: var(--red); border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ───── PROGRESS BAR ───── */
+.prog { position: fixed; top: 0; left: 0; height: 3px; background: var(--red); z-index: 200; width: 0; }
+
+/* ───── TOAST ───── */
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: #1a1a1a; color: #fff;
+  padding: 12px 20px; border-radius: 10px;
+  font-size: .86rem; font-weight: 600;
+  box-shadow: 0 6px 20px rgba(0,0,0,.2);
+  z-index: 300; opacity: 0; transform: translateY(6px);
+  transition: opacity .25s, transform .25s; pointer-events: none;
+}
+.toast.on { opacity: 1; transform: translateY(0); }
+
+/* ───── FOOTER ───── */
+.foot {
+  text-align: center; padding: 18px 28px;
+  font-size: .8rem; color: var(--muted);
+  border-top: 1px solid var(--border); background: #fff;
+}
+.foot a { color: var(--red); text-decoration: none; }
+.foot a:hover { text-decoration: underline; }
+
+@media(max-width:600px){
+  .topbar,.cattabs,.controls,.wrap,.foot { padding-left:14px; padding-right:14px; }
+}
+</style>
+</head>
+<body>
+
+<div class="prog" id="prog"></div>
+
+<div class="overlay" id="overlay">
+  <div class="spin"></div>
+  <div style="color:var(--red);font-weight:700;font-size:.88rem;">Fetching deals…</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a class="brand" href="index.html">
+    <div class="bull">&#8857;</div>
+    <div>
+      <div class="brand-name">Target</div>
+      <div class="brand-sub">Sale Tracker</div>
+    </div>
+  </a>
+
+  <div class="searchbox">
+    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#aaa" stroke-width="2.5">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input id="q" type="text" placeholder="Search sale items…" autocomplete="off">
+  </div>
+
+  <div class="topbar-right">
+    <div class="pill">
+      <span class="dot dot-demo" id="sdot"></span>
+      <span id="slabel">Demo data</span>
+    </div>
+    <button class="btn-sm" id="refreshBtn" onclick="doRefresh()">&#8635; Refresh</button>
+    <a class="btn-sm" href="index.html" style="text-decoration:none">&#8592; Home</a>
+  </div>
+</div>
+
+<!-- CATEGORY TABS -->
+<div class="cattabs" id="cats">
+  <div class="tab active" data-c="all">All Deals</div>
+  <div class="tab" data-c="electronics">Electronics</div>
+  <div class="tab" data-c="clothing">Clothing</div>
+  <div class="tab" data-c="home">Home</div>
+  <div class="tab" data-c="food">Food &amp; Drink</div>
+  <div class="tab" data-c="toys">Toys</div>
+  <div class="tab" data-c="beauty">Beauty</div>
+  <div class="tab" data-c="sports">Sports</div>
+  <div class="tab" data-c="pet">Pet</div>
+</div>
+
+<!-- BANNERS -->
+<div class="banner banner-demo" id="demoBanner">
+  &#9888; Showing <strong>demo data</strong> — connect a backend proxy for live Target prices.
+  <a href="#" onclick="showProxyInfo();return false;" style="color:#92400e;font-weight:700;margin-left:4px;">How?</a>
+</div>
+<div class="banner banner-watch" id="watchBanner">
+  &#10084; Watching <span class="wcount" id="wcount">0</span> items — you'll be alerted when their prices drop.
+</div>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <div class="res-count"><b id="cnt">0</b> deals found</div>
+  <label style="font-size:.84rem;color:var(--muted);">Sort:
+    <select id="sortSel" onchange="render()">
+      <option value="discount">Biggest Discount</option>
+      <option value="price_lo">Price: Low → High</option>
+      <option value="price_hi">Price: High → Low</option>
+      <option value="newest">New Arrivals First</option>
+    </select>
+  </label>
+  <button class="btn-toggle" id="wbtn" onclick="toggleWatchFilter()">&#10084; Watchlist only</button>
+</div>
+
+<!-- MAIN -->
+<div class="wrap">
+  <div class="grid" id="grid"></div>
+</div>
+
+<div class="foot">
+  Updated: <span id="ts">—</span> &nbsp;·&nbsp; Auto-refresh every 30 min &nbsp;·&nbsp;
+  <a href="index.html">Home</a> &nbsp;·&nbsp;
+  <a href="prompts.html">Prompt Log</a>
+</div>
+
+<script>
+/*
+ ┌──────────────────────────────────────────────────────────┐
+ │  LIVE DATA SETUP (optional)                              │
+ │                                                          │
+ │  1. Install:  npm install express node-fetch cors        │
+ │  2. Run:      node target_proxy.js  (port 3001)          │
+ │  3. Set LIVE = true below                                │
+ │                                                          │
+ │  The proxy fetches Target's clearance + sale endpoints   │
+ │  server-side and returns normalised JSON:                │
+ │  { deals: [ { id, cat, icon, title, orig, sale,          │
+ │               rating, reviews, isNew, url } ] }          │
+ └──────────────────────────────────────────────────────────*/
+const LIVE      = false;  // set true + run target_proxy.js for live data
+const PROXY     = 'http://localhost:3001/api/deals';
+const TICK_MS   = 30 * 60 * 1000; // 30-minute auto-refresh
+
+// ─── DEMO CATALOGUE ─────────────────────────────────────────
+const DEMO = [
+  // Electronics
+  {id:'e1',cat:'electronics',icon:'📺',title:'Samsung 55" 4K QLED Smart TV (2025)',orig:699.99,sale:399.99,rating:4.7,reviews:1843,isNew:true},
+  {id:'e2',cat:'electronics',icon:'🎧',title:'Sony WH-1000XM5 Noise Cancelling Headphones',orig:399.99,sale:248.00,rating:4.8,reviews:3821},
+  {id:'e3',cat:'electronics',icon:'💻',title:'Apple iPad 10th Gen 64GB Wi-Fi',orig:449.00,sale:319.00,rating:4.9,reviews:1022},
+  {id:'e4',cat:'electronics',icon:'🎮',title:'Nintendo Switch OLED – Splatoon 3 Edition',orig:359.99,sale:279.99,rating:4.8,reviews:2134,isNew:true},
+  {id:'e5',cat:'electronics',icon:'📷',title:'Canon EOS R50 Mirrorless Camera',orig:679.99,sale:449.99,rating:4.6,reviews:612},
+  {id:'e6',cat:'electronics',icon:'🔊',title:'Bose SoundLink Flex Bluetooth Speaker',orig:149.00,sale:99.00,rating:4.7,reviews:4310},
+
+  // Clothing
+  {id:'c1',cat:'clothing',icon:'👗',title:"Women's Wrap Midi Dress – A New Day",orig:39.99,sale:15.99,rating:4.4,reviews:521},
+  {id:'c2',cat:'clothing',icon:'👔',title:"Men's Slim Fit Chino Pants – Goodfellow",orig:34.99,sale:16.99,rating:4.5,reviews:1102},
+  {id:'c3',cat:'clothing',icon:'🧥',title:"Kids' Hooded Puffer Vest – Cat & Jack",orig:32.00,sale:12.99,rating:4.8,reviews:3200,isNew:true},
+  {id:'c4',cat:'clothing',icon:'👟',title:"Women's Energize Cloud Walk Sneaker",orig:49.99,sale:27.99,rating:4.5,reviews:841},
+  {id:'c5',cat:'clothing',icon:'🩳',title:"Men's 7\" Liner Shorts – All in Motion",orig:28.00,sale:13.98,rating:4.6,reviews:1890},
+  {id:'c6',cat:'clothing',icon:'🧣',title:"Chunky Knit Blanket Scarf – Universal Thread",orig:29.99,sale:11.99,rating:4.3,reviews:620},
+
+  // Home
+  {id:'h1',cat:'home',icon:'🛋️',title:'Queen Microfiber Sheet Set – Room Essentials',orig:24.00,sale:10.99,rating:4.5,reviews:4100},
+  {id:'h2',cat:'home',icon:'🧹',title:'Dyson V8 Cordless Vacuum',orig:449.99,sale:299.99,rating:4.7,reviews:7321,isNew:true},
+  {id:'h3',cat:'home',icon:'🍳',title:'Calphalon 10-Piece Nonstick Cookware Set',orig:249.99,sale:119.99,rating:4.6,reviews:2180},
+  {id:'h4',cat:'home',icon:'🪴',title:'6" Terracotta Pot 3-Pack – Hearth & Hand',orig:18.99,sale:8.49,rating:4.8,reviews:1140},
+  {id:'h5',cat:'home',icon:'💡',title:'Philips Hue Smart Bulb Starter Kit (4-pack)',orig:79.99,sale:44.99,rating:4.7,reviews:3420},
+
+  // Food & Drink
+  {id:'f1',cat:'food',icon:'☕',title:"Starbucks Pike Place K-Cups 32ct",orig:23.99,sale:14.99,rating:4.7,reviews:6130},
+  {id:'f2',cat:'food',icon:'🥤',title:'Celsius Energy Variety Pack 12-can',orig:29.99,sale:19.99,rating:4.8,reviews:2870,isNew:true},
+  {id:'f3',cat:'food',icon:'🍫',title:'Ghirardelli Premium Chocolate Assortment 24pc',orig:28.99,sale:16.49,rating:4.9,reviews:1320},
+  {id:'f4',cat:'food',icon:'🌿',title:'Bigelow Organic Green Tea 40-count',orig:9.99,sale:5.49,rating:4.6,reviews:990},
+
+  // Toys
+  {id:'t1',cat:'toys',icon:'🧸',title:'LEGO Classic Creative Bricks 1500-Piece Set',orig:64.99,sale:38.99,rating:4.9,reviews:4200},
+  {id:'t2',cat:'toys',icon:'🚗',title:'Hot Wheels 20-Car Collector Gift Pack 2025',orig:24.99,sale:13.99,rating:4.8,reviews:2500,isNew:true},
+  {id:'t3',cat:'toys',icon:'🎨',title:"Crayola Ultimate Art & Craft Supply Kit",orig:39.99,sale:21.99,rating:4.7,reviews:1040},
+  {id:'t4',cat:'toys',icon:'🤖',title:'Sphero Mini Activity Robot Kit',orig:79.99,sale:39.99,rating:4.5,reviews:490},
+
+  // Beauty
+  {id:'b1',cat:'beauty',icon:'💄',title:'NYX Professional Matte Lip Vault Kit (6pc)',orig:46.00,sale:22.00,rating:4.5,reviews:1990},
+  {id:'b2',cat:'beauty',icon:'🧴',title:'CeraVe Moisturizing Cream 19oz',orig:22.99,sale:13.49,rating:4.9,reviews:11200},
+  {id:'b3',cat:'beauty',icon:'🌸',title:'Neutrogena Hydro Boost Water Gel Serum',orig:31.99,sale:18.99,rating:4.6,reviews:2780,isNew:true},
+  {id:'b4',cat:'beauty',icon:'💅',title:'OPI Nail Lacquer 4-Pack – Spring 2025',orig:38.00,sale:20.99,rating:4.7,reviews:820},
+
+  // Sports
+  {id:'s1',cat:'sports',icon:'🏋️',title:'All in Motion Yoga Mat + Cork Block Set',orig:42.99,sale:21.99,rating:4.6,reviews:1520},
+  {id:'s2',cat:'sports',icon:'🚴',title:'Schwinn IC4 Indoor Cycling Bike',orig:999.00,sale:599.00,rating:4.5,reviews:3900,isNew:true},
+  {id:'s3',cat:'sports',icon:'⛺',title:'Coleman 6-Person Instant Cabin Tent',orig:199.99,sale:109.99,rating:4.7,reviews:1340},
+  {id:'s4',cat:'sports',icon:'🥊',title:'Everlast 70lb Heavy Bag Boxing Set',orig:109.99,sale:64.99,rating:4.4,reviews:720},
+
+  // Pet
+  {id:'p1',cat:'pet',icon:'🐕',title:"Blue Buffalo Life Protection Dog Food 30lb",orig:79.99,sale:46.99,rating:4.8,reviews:6100},
+  {id:'p2',cat:'pet',icon:'🐈',title:'Friska Cat Tree & Condo 52" Scratching Post',orig:94.99,sale:52.99,rating:4.7,reviews:2540,isNew:true},
+  {id:'p3',cat:'pet',icon:'🐠',title:'Tetra 20 Gallon Complete Aquarium Kit',orig:139.99,sale:74.99,rating:4.5,reviews:930},
+];
+
+// ─── STATE ──────────────────────────────────────────────────
+let deals       = [];
+let curCat      = 'all';
+let watchOnly   = false;
+let saved       = new Set(JSON.parse(localStorage.getItem('ts_watch') || '[]'));
+
+// ─── UTILS ──────────────────────────────────────────────────
+const pct  = (o,s) => Math.round((1-s/o)*100);
+const save = (o,s) => (o-s).toFixed(2);
+const strs = r => '★'.repeat(Math.floor(r)) + (r%1>=.5?'½':'') + '☆'.repeat(5-Math.floor(r)-(r%1>=.5?1:0));
+const $    = id => document.getElementById(id);
+
+function toast(msg, ms=2600) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('on');
+  setTimeout(() => t.classList.remove('on'), ms);
+}
+
+// ─── WATCHLIST ───────────────────────────────────────────────
+function toggleSave(id) {
+  if (saved.has(id)) { saved.delete(id); toast('Removed from watchlist.'); }
+  else               { saved.add(id);    toast('Added to watchlist!'); }
+  localStorage.setItem('ts_watch', JSON.stringify([...saved]));
+  syncWatchUI(); render();
+}
+function syncWatchUI() {
+  const n = saved.size;
+  $('wcount').textContent = n;
+  $('watchBanner').classList.toggle('on', n > 0);
+}
+function toggleWatchFilter() {
+  watchOnly = !watchOnly;
+  $('wbtn').classList.toggle('on', watchOnly);
+  render();
+}
+
+// ─── CARD ────────────────────────────────────────────────────
+function card(d) {
+  const off  = pct(d.orig, d.sale);
+  const sv   = save(d.orig, d.sale);
+  const on   = saved.has(d.id);
+  // Use the real product URL from the API, or fall back to a Target search
+  const url  = d.url || `https://www.target.com/s?searchTerm=${encodeURIComponent(d.title)}`;
+  return `<div class="card${on?' saved':''}" id="c-${d.id}">
+    <div class="badge-off">-${off}% OFF</div>
+    ${d.isNew?'<div class="badge-new">NEW</div>':''}
+    <div class="thumb">
+      ${d.img
+        ? `<img src="${d.img}" alt="${d.title}" loading="lazy" onerror="this.parentElement.innerHTML='${d.icon}'">`
+        : d.icon}
+    </div>
+    <div class="cbody">
+      <div class="ccat">${d.cat}</div>
+      <div class="ctitle">${d.title}</div>
+      <div class="crating"><span class="stars">${strs(d.rating)}</span> ${d.rating} (${d.reviews.toLocaleString()})</div>
+      <div class="cprice">
+        <span class="psale">$${d.sale.toFixed(2)}</span>
+        <span class="porig">$${d.orig.toFixed(2)}</span>
+        <span class="psave">Save $${sv}</span>
+      </div>
+    </div>
+    <div class="cfoot">
+      <a class="btn-buy" href="${url}" target="_blank" rel="noopener">View on Target ↗</a>
+      <button class="btn-save${on?' on':''}" onclick="toggleSave('${d.id}')" title="${on?'Remove':'Watch'}">
+        ${on?'❤️':'🤍'}
+      </button>
+    </div>
+  </div>`;
+}
+
+// ─── RENDER ──────────────────────────────────────────────────
+function render() {
+  const q    = $('q').value.toLowerCase().trim();
+  const sort = $('sortSel').value;
+
+  let list = deals.filter(d => {
+    if (curCat !== 'all' && d.cat !== curCat) return false;
+    if (watchOnly && !saved.has(d.id)) return false;
+    if (q && !d.title.toLowerCase().includes(q) && !d.cat.includes(q)) return false;
+    return true;
+  });
+
+  list.sort((a,b) => {
+    if (sort==='discount') return pct(b.orig,b.sale)-pct(a.orig,a.sale);
+    if (sort==='price_lo') return a.sale-b.sale;
+    if (sort==='price_hi') return b.sale-a.sale;
+    if (sort==='newest')   return (b.isNew?1:0)-(a.isNew?1:0);
+    return 0;
+  });
+
+  $('cnt').textContent = list.length;
+  $('grid').innerHTML  = list.length
+    ? list.map(card).join('')
+    : `<div class="empty"><h3>No deals found</h3><p>Try a different category or search term.</p></div>`;
+}
+
+// ─── LOAD ────────────────────────────────────────────────────
+async function load() {
+  $('overlay').classList.add('on');
+  if (LIVE) {
+    try {
+      const r = await fetch(PROXY);
+      if (!r.ok) throw new Error(`Proxy returned ${r.status}`);
+      const j = await r.json();
+      if (!j.deals || j.deals.length === 0) throw new Error('No deals returned');
+      deals = j.deals;
+      $('sdot').className = 'dot dot-live';
+      $('slabel').textContent = `Live · ${deals.length} deals`;
+      $('demoBanner').style.display = 'none';
+    } catch(e) {
+      console.warn('Live fetch failed, using demo data.', e);
+      deals = DEMO;
+      $('slabel').textContent = 'Demo (proxy offline)';
+      $('demoBanner').innerHTML = '⚠ Proxy not running — showing demo data. Run <strong>node target_proxy.js</strong> in the <code>target_sale/</code> folder.';
+    }
+  } else {
+    deals = DEMO;
+  }
+  $('overlay').classList.remove('on');
+  $('ts').textContent = new Date().toLocaleTimeString();
+  render();
+}
+
+async function doRefresh() {
+  const btn = $('refreshBtn');
+  btn.textContent = '⏳ Refreshing…'; btn.disabled = true;
+  await load();
+  btn.textContent = '↻ Refresh'; btn.disabled = false;
+  toast('Deals refreshed!');
+}
+
+// ─── PROXY INFO ──────────────────────────────────────────────
+function showProxyInfo() {
+  alert(
+    'To enable live Target data:\n\n' +
+    '1.  npm install express node-fetch cors\n' +
+    '2.  node target_proxy.js   (included — runs on :3001)\n' +
+    '3.  Set  LIVE = true  at the top of this file\n\n' +
+    'The proxy hits Target\'s sale/clearance endpoints server-side\n' +
+    'and returns normalised JSON to this page.'
+  );
+}
+
+// ─── PROGRESS BAR AUTO-REFRESH ───────────────────────────────
+let t0 = Date.now();
+(function tick() {
+  const pct = Math.min((Date.now()-t0)/TICK_MS*100, 100);
+  $('prog').style.width = pct+'%';
+  if (Date.now()-t0 >= TICK_MS) { t0=Date.now(); load().then(()=>toast('Auto-refreshed!')); }
+  requestAnimationFrame(tick);
+})();
+
+// ─── EVENTS ─────────────────────────────────────────────────
+$('cats').addEventListener('click', e => {
+  const tab = e.target.closest('.tab'); if (!tab) return;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  tab.classList.add('active');
+  curCat = tab.dataset.c;
+  render();
+});
+$('q').addEventListener('input', render);
+
+// ─── INIT ────────────────────────────────────────────────────
+load();
+syncWatchUI();
+</script>
+</body>
+</html>
