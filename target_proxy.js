@@ -17,8 +17,11 @@ const app  = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors());
-// Serve the static HTML/CSS/JS files in this folder
-app.use(express.static(path.join(__dirname)));
+// Static files are served by Vercel in production.
+// For local development, serve them from this folder.
+if (process.env.NODE_ENV !== 'production') {
+  app.use(express.static(path.join(__dirname)));
+}
 
 // ── Cache ────────────────────────────────────────────────────
 let CACHE    = null;
