@@ -202,11 +202,15 @@ app.get('/health', (_, res) =>
   res.json({ status: 'ok', visitor_id: VISITOR_ID, cached: !!CACHE, deals: CACHE?.length || 0 })
 );
 
-// ── Start ─────────────────────────────────────────────────────
-app.listen(PORT, async () => {
-  await getVisitorId();
-  console.log(`\n  Target Sale Proxy  →  http://localhost:${PORT}`);
-  console.log(`  visitor_id: ${VISITOR_ID}`);
-  console.log(`  /api/deals  — live sale items`);
-  console.log(`  /health     — status\n`);
-});
+// ── Start (local) / Export (Vercel) ──────────────────────────
+if (require.main === module) {
+  app.listen(PORT, async () => {
+    await getVisitorId();
+    console.log(`\n  Target Sale Proxy  →  http://localhost:${PORT}`);
+    console.log(`  visitor_id: ${VISITOR_ID}`);
+    console.log(`  /api/deals  — live sale items`);
+    console.log(`  /health     — status\n`);
+  });
+}
+
+module.exports = app;
